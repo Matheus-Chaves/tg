@@ -3,6 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tg/themes/main_theme.dart';
 
+final List<String> imgList = [
+  "assets/images/presentation_1.svg",
+  "assets/images/presentation_2.svg",
+  "assets/images/presentation_3.svg"
+];
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
