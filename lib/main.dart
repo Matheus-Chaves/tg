@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,7 +13,7 @@ final List<String> imgList = [
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent, // transparent status bar
+    statusBarColor: Colors.transparent,
   ));
   runApp(const MyApp());
 }
@@ -37,17 +38,57 @@ class Presentation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double height = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: SafeArea(
-        child: Column(
-          children: [
-            SvgPicture.asset(
-              "assets/images/presentation_1.svg",
-              semanticsLabel: 'Two persons talking',
-            ),
-            const Text("Hi"),
-          ],
+        child: CarouselSlider(
+          options: CarouselOptions(
+            height: height,
+            viewportFraction: 1.0,
+            enlargeCenterPage: false,
+            enableInfiniteScroll: false,
+            autoPlay: true,
+            autoPlayInterval: const Duration(seconds: 5),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            autoPlayCurve: Curves.fastOutSlowIn,
+            pauseAutoPlayOnManualNavigate: true,
+            pauseAutoPlayInFiniteScroll: true,
+          ),
+          items: imgList
+              .map(
+                (img) => Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: SvgPicture.asset(
+                        img,
+                        alignment: Alignment.topCenter,
+                        clipBehavior: Clip.antiAlias,
+                        fit: BoxFit.cover,
+                        height: height / 1.8,
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: ["1", "2", "3"]
+                          .map(
+                            (id) => const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 2),
+                              child: Icon(
+                                Icons.circle,
+                                color: Colors.white,
+                                size: 12,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+              )
+              .toList(),
         ),
       ),
     );
