@@ -33,8 +33,16 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Presentation extends StatelessWidget {
+class Presentation extends StatefulWidget {
   const Presentation({Key? key}) : super(key: key);
+
+  @override
+  State<Presentation> createState() => _PresentationState();
+}
+
+class _PresentationState extends State<Presentation> {
+  int _currentPage = 0;
+  final CarouselController _carouselController = CarouselController();
 
   @override
   Widget build(BuildContext context) {
@@ -42,53 +50,76 @@ class Presentation extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       body: SafeArea(
-        child: CarouselSlider(
-          options: CarouselOptions(
-            height: height,
-            viewportFraction: 1.0,
-            enlargeCenterPage: false,
-            enableInfiniteScroll: false,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 5),
-            autoPlayAnimationDuration: const Duration(milliseconds: 800),
-            autoPlayCurve: Curves.fastOutSlowIn,
-            pauseAutoPlayOnManualNavigate: true,
-            pauseAutoPlayInFiniteScroll: true,
-          ),
-          items: imgList
-              .map(
-                (img) => Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: SvgPicture.asset(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Flexible(
+              child: CarouselSlider(
+                carouselController: _carouselController,
+                options: CarouselOptions(
+                  height: height / 1.7,
+                  viewportFraction: 1.0,
+                  enlargeCenterPage: false,
+                  enableInfiniteScroll: false,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 5),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
+                  autoPlayCurve: Curves.easeInCubic,
+                  pauseAutoPlayOnManualNavigate: true,
+                  pauseAutoPlayInFiniteScroll: true,
+                  onPageChanged: (index, reason) => {
+                    setState(() {
+                      _currentPage = index;
+                    })
+                  },
+                ),
+                items: imgList
+                    .map(
+                      (img) => SvgPicture.asset(
                         img,
                         alignment: Alignment.topCenter,
                         clipBehavior: Clip.antiAlias,
                         fit: BoxFit.cover,
-                        height: height / 1.8,
                       ),
+                    )
+                    .toList(),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: imgList.asMap().entries.map((entry) {
+                return GestureDetector(
+                  onTap: () => _carouselController.animateToPage(entry.key),
+                  child: Container(
+                    width: 12.0,
+                    height: 12.0,
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 2.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white
+                          .withOpacity(_currentPage == entry.key ? 0.9 : 0.4),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: ["1", "2", "3"]
-                          .map(
-                            (id) => const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 2),
-                              child: Icon(
-                                Icons.circle,
-                                color: Colors.white,
-                                size: 12,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                ),
-              )
-              .toList(),
+                  ),
+                );
+              }).toList(),
+            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: ["1", "2", "3"]
+            //       .map(
+            //         (id) => const Padding(
+            //           padding: EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+            //           child: Icon(
+            //             Icons.circle,
+            //             color: Colors.white,
+            //             size: 12,
+            //           ),
+            //         ),
+            //       )
+            //       .toList(),
+            // ),
+          ],
         ),
       ),
     );
