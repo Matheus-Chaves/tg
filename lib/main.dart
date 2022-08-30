@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tg/themes/main_theme.dart';
 
-const List<String> imgList = [
-  "assets/images/presentation_1.svg",
-  "assets/images/presentation_2.svg",
-  "assets/images/presentation_3.svg"
-];
-
-const List<Map<String, String>> cardList = [
+const List<Map<String, String>> presentationData = [
   {
+    "path": "assets/images/presentation_1.svg",
     "title": "Encontre o serviço ideal",
     "description":
         "Com várias opções de preço e categorias de trabalho, encontre a pessoa certa para sua necessidade."
   },
   {
+    "path": "assets/images/presentation_2.svg",
     "title": "Venda seu trabalho",
     "description":
         "Apresente o que você faz, dê seu preço e comercialize seu serviço! Fácil, rápido e sem burocracia."
   },
   {
+    "path": "assets/images/presentation_3.svg",
     "title": "Faça parte da equipe",
     "description":
         "Seja um cliente ou um vendedor! Crie sua conta e comece a fazer parte do nosso time ainda hoje."
@@ -58,109 +56,134 @@ class Presentation extends StatefulWidget {
 
 class _PresentationState extends State<Presentation> {
   final PageController imgController = PageController();
-  final PageController cardController = PageController();
-  ValueNotifier<double> selectedIndex = ValueNotifier<double>(0.0);
-
-  @override
-  void dispose() {
-    imgController.dispose();
-    cardController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification notification) {
-                  if (notification.depth == 0 &&
-                      notification is ScrollUpdateNotification) {
-                    selectedIndex.value = imgController.page!;
-                    if (cardController.page != imgController.page) {
-                      cardController.position
-                          // ignore: deprecated_member_use
-                          .jumpToWithoutSettling(
-                              imgController.position.pixels / 1);
-                    }
-                    setState(() {});
-                  }
-                  return false;
-                },
-                child: PageView(
-                  controller: imgController,
-                  children: imgList.asMap().entries.map((pageNumber) {
-                    return SvgPicture.asset(
-                      //height: height * (50.12 / 100),
-                      imgList[pageNumber.key],
-                      alignment: Alignment.topCenter,
-                      clipBehavior: Clip.antiAlias,
-                      fit: BoxFit.fill,
-                      width: double.infinity,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: imgList.asMap().entries.map((entry) {
-                return GestureDetector(
-                  onTap: () => _goToPage(entry.key),
-                  child: Container(
-                    width: 12.0,
-                    height: 12.0,
-                    margin: const EdgeInsets.only(
-                      top: 8.0,
-                      bottom: 16,
-                      left: 2.0,
-                      right: 2.0,
-                    ),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(
-                        imgController.initialPage == entry.key ? 1 : 0.5,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            SizedBox(
-              height: height * (38.80 / 100),
               child: PageView(
-                controller: cardController,
-                children: cardList.asMap().entries.map((pageNumber) {
-                  return Card(
-                    elevation: 1,
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Text(cardList[pageNumber.key]["title"]!),
-                          Text(cardList[pageNumber.key]["description"]!),
-                        ],
+                controller: imgController,
+                children: presentationData.asMap().entries.map((index) {
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: SvgPicture.asset(
+                          //height: height * (50.12 / 100),
+                          presentationData[index.key]["path"]!,
+                          alignment: Alignment.topCenter,
+                          clipBehavior: Clip.antiAlias,
+                          fit: BoxFit.fill,
+                          width: double.infinity,
+                        ),
                       ),
-                    ),
+                      Card(
+                        elevation: 0,
+                        margin: const EdgeInsets.only(top: 16),
+                        color: Colors.transparent,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  presentationData[index.key]["title"]!,
+                                  maxLines: 1,
+                                  textAlign: TextAlign.center,
+                                  textScaleFactor: 1.3,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge!
+                                      .copyWith(color: Colors.white),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  presentationData[index.key]["description"]!,
+                                  maxLines: 3,
+                                  textAlign: TextAlign.center,
+                                  textScaleFactor: 1.25,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   );
                 }).toList(),
+              ),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              height: 80,
+              margin: const EdgeInsets.only(top: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {},
+                    style: const ButtonStyle(),
+                    child: Text(
+                      "PULAR",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontFamily: "Roboto"),
+                    ),
+                  ),
+                  Center(
+                    child: SmoothPageIndicator(
+                      controller: imgController,
+                      count: 3,
+                      effect: WormEffect(
+                        spacing: 8,
+                        dotHeight: 14,
+                        dotWidth: 14,
+                        type: WormType.thin,
+                        dotColor: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.35),
+                        activeDotColor:
+                            Theme.of(context).colorScheme.background,
+                      ),
+                      onDotClicked: (page) {
+                        imgController.animateToPage(
+                          page,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.ease,
+                        );
+                      },
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      "PRÓXIMO",
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(fontFamily: "Roboto"),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
     );
-  }
-
-  void _goToPage(int page) {
-    imgController.animateToPage(page,
-        duration: const Duration(milliseconds: 200), curve: Curves.linear);
-    cardController.animateToPage(page,
-        duration: const Duration(milliseconds: 200), curve: Curves.linear);
   }
 }
