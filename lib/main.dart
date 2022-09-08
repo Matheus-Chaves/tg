@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -56,17 +57,22 @@ class Presentation extends StatefulWidget {
 
 class _PresentationState extends State<Presentation> {
   final PageController imgController = PageController();
+  static const onboardingGreen = Color(0xFF078D6D);
+  bool isLastPage = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: onboardingGreen,
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: PageView(
                 controller: imgController,
+                onPageChanged: (index) {
+                  setState(() => isLastPage = index == 2);
+                },
                 children: presentationData.asMap().entries.map((index) {
                   return Column(
                     children: [
@@ -89,26 +95,28 @@ class _PresentationState extends State<Presentation> {
                           child: Center(
                             child: Column(
                               children: [
-                                Text(
-                                  presentationData[index.key]["title"]!,
-                                  maxLines: 1,
-                                  textAlign: TextAlign.center,
-                                  textScaleFactor: 1.3,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge!
-                                      .copyWith(color: Colors.white),
+                                FittedBox(
+                                  child: Text(
+                                    presentationData[index.key]["title"]!,
+                                    maxLines: 1,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 64,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 16),
-                                Text(
+                                AutoSizeText(
                                   presentationData[index.key]["description"]!,
                                   maxLines: 3,
                                   textAlign: TextAlign.center,
-                                  textScaleFactor: 1.25,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodyMedium!
-                                      .copyWith(color: Colors.white),
+                                  textScaleFactor: 1.24,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 56,
+                                  ),
                                 ),
                               ],
                             ),
@@ -120,65 +128,157 @@ class _PresentationState extends State<Presentation> {
                 }).toList(),
               ),
             ),
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              height: 80,
-              margin: const EdgeInsets.only(top: 32),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    style: const ButtonStyle(),
-                    child: Text(
-                      "PULAR",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(fontFamily: "Roboto"),
-                    ),
-                  ),
-                  Center(
-                    child: SmoothPageIndicator(
-                      controller: imgController,
-                      count: 3,
-                      effect: WormEffect(
-                        spacing: 8,
-                        dotHeight: 14,
-                        dotWidth: 14,
-                        type: WormType.thin,
-                        dotColor: Theme.of(context)
-                            .colorScheme
-                            .background
-                            .withOpacity(0.35),
-                        activeDotColor:
-                            Theme.of(context).colorScheme.background,
+            AnimatedSize(
+              alignment: isLastPage ? Alignment.center : Alignment.bottomLeft,
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.fastOutSlowIn,
+              child: Container(
+                //duration: const Duration(milliseconds: 700),
+                //height: isLastPage ? 110 : 90,
+                margin: const EdgeInsets.only(top: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+                ),
+                child: !isLastPage
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              imgController.animateToPage(
+                                2,
+                                duration: const Duration(milliseconds: 1000),
+                                curve: Curves.ease,
+                              );
+                            },
+                            style: const ButtonStyle(),
+                            child: Text(
+                              "PULAR",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(fontFamily: "Roboto"),
+                            ),
+                          ),
+                          Center(
+                            child: SmoothPageIndicator(
+                              controller: imgController,
+                              count: 3,
+                              effect: WormEffect(
+                                spacing: 8,
+                                dotHeight: 14,
+                                dotWidth: 14,
+                                type: WormType.thin,
+                                dotColor: onboardingGreen.withOpacity(0.35),
+                                activeDotColor: onboardingGreen,
+                              ),
+                              onDotClicked: (page) {
+                                imgController.animateToPage(
+                                  page,
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.ease,
+                                );
+                              },
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              imgController.nextPage(
+                                duration: const Duration(milliseconds: 1000),
+                                curve: Curves.ease,
+                              );
+                            },
+                            child: Text(
+                              "PRÓXIMO",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium!
+                                  .copyWith(fontFamily: "Roboto"),
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          // const Divider(),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 48,
+                            child: Directionality(
+                              textDirection: TextDirection.rtl,
+                              child: ElevatedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.arrow_back),
+                                label: const Text("Começar"),
+                                style: ButtonStyle(
+                                  overlayColor: MaterialStateProperty.all(
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .onBackground
+                                        .withOpacity(0.35),
+                                  ),
+                                  shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  ),
+                                  backgroundColor: MaterialStateProperty.all(
+                                    Theme.of(context).colorScheme.primary,
+                                  ),
+                                  foregroundColor: MaterialStateProperty.all(
+                                    Theme.of(context).colorScheme.background,
+                                  ),
+                                  textStyle: MaterialStateProperty.resolveWith(
+                                    (states) => Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(
+                                          fontSize: 20,
+                                          fontFamily: 'Roboto',
+                                        ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: FittedBox(
+                              child: Text.rich(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium!
+                                    .copyWith(
+                                      fontSize: 16,
+                                      fontFamily: 'Roboto',
+                                    ),
+                                TextSpan(
+                                  text: "Já possui uma conta? ",
+                                  children: [
+                                    TextSpan(
+                                      text: "Faça o login",
+                                      style: TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      onDotClicked: (page) {
-                        imgController.animateToPage(
-                          page,
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.ease,
-                        );
-                      },
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      "PRÓXIMO",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(fontFamily: "Roboto"),
-                    ),
-                  ),
-                ],
               ),
             ),
           ],
