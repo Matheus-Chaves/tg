@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'color_schemes.g.dart';
 
-const green = Color(0xFF078D6D);
-
 ThemeData mainTheme = ThemeData(
   useMaterial3: true,
   colorScheme: lightColorScheme,
