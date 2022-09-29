@@ -175,7 +175,7 @@ class _OnboardingState extends State<Onboarding> {
                           ),
                           SizedBox(
                             width: double.infinity,
-                            height: 48,
+                            height: 45,
                             child: Directionality(
                               textDirection: TextDirection.rtl,
                               child: ElevatedButton.icon(
