@@ -44,13 +44,13 @@ class ProfileController extends GetxController {
     }
   }
 
-  void addData(Map<String, dynamic> data) async {
+  void addData(Map<String, dynamic> data, {String? tipoUsuario}) async {
     try {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_user.value!.uid)
           .set(data, SetOptions(merge: true));
-      Get.offAll(() => HomePage());
+      Get.offAll(() => HomePage(tipoUsuario: tipoUsuario));
     } catch (e) {
       Get.snackbar("Erro em registrar as informações.", "$e");
     }

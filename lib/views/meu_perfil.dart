@@ -208,7 +208,10 @@ class _MeuPerfilState extends State<MeuPerfil> {
                         "updatedAt": Timestamp.now(),
                         "tipoUsuario": data!["tipoUsuario"],
                       };
-                      _profileController.addData(newData);
+                      _profileController.addData(
+                        newData,
+                        tipoUsuario: novoPerfil,
+                      );
                       Get.offAll(() => HomePage(tipoUsuario: novoPerfil));
                     }
                   },
