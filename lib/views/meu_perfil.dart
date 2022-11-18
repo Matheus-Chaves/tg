@@ -25,14 +25,14 @@ class _MeuPerfilState extends State<MeuPerfil> {
       _profileController.getData().then((val) {
         setState(() {
           data = val;
+          data!.forEach((key, value) {
+            if (value == "") {
+              data![key] = key;
+            }
+          });
         });
       });
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
