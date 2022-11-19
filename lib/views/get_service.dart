@@ -176,16 +176,16 @@ class _GetServiceState extends State<GetService> {
                                       Get.put(RequestController());
                                   requestController.addRequest(
                                     RequestModel(
-                                      user!.uid,
-                                      widget.service.id as String,
-                                      _descricaoSolicitacao.text.trim(),
-                                      Timestamp.now(),
-                                      "a aceitar",
-                                      FirebaseFirestore.instance
-                                          .collection("requests")
-                                          .doc()
-                                          .id,
-                                    ),
+                                        user!.uid,
+                                        widget.service.id as String,
+                                        _descricaoSolicitacao.text.trim(),
+                                        Timestamp.now(),
+                                        "a aceitar",
+                                        FirebaseFirestore.instance
+                                            .collection("requests")
+                                            .doc()
+                                            .id,
+                                        widget.service.uid),
                                   );
                                 },
                                 child: const Text("SOLICITAR SERVIÇO"),

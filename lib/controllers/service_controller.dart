@@ -38,6 +38,31 @@ class ServiceController extends GetxController {
     }
   }
 
+  Future<void> getAllServices() async {
+    try {
+      QuerySnapshot services = await FirebaseFirestore.instance
+          .collection('servicos')
+          .orderBy("categoria")
+          .get();
+      serviceList.clear();
+      for (var service in services.docs) {
+        serviceList.add(ServiceModel(
+          service['cpfPrestador'],
+          service['categoria'],
+          service['descricao'],
+          service['valorMinimo'],
+          service['uid'],
+          service['dataCadastro'],
+          id: service.id,
+        ));
+      }
+      isLoading = false;
+      update();
+    } catch (e) {
+      Get.snackbar('Erro em obter o serviço', e.toString());
+    }
+  }
+
   Future<void> createService(ServiceModel service) async {
     try {
       await FirebaseFirestore.instance

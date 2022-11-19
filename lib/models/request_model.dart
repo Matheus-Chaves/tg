@@ -7,9 +7,10 @@ class RequestModel {
   late Timestamp dataSolicitacao;
   late String status;
   late String id;
+  late String prestadorId;
 
   RequestModel(this.solicitanteId, this.servicoId, this.descricao,
-      this.dataSolicitacao, this.status, this.id);
+      this.dataSolicitacao, this.status, this.id, this.prestadorId);
 
   RequestModel.fromDocumentSnapshot({required DocumentSnapshot docSnapshot}) {
     solicitanteId = docSnapshot["solicitanteId"];
@@ -18,6 +19,7 @@ class RequestModel {
     dataSolicitacao = docSnapshot["dataSolicitacao"];
     status = docSnapshot["status"];
     id = docSnapshot["id"];
+    prestadorId = docSnapshot["prestadorId"];
   }
 
   Map<String, dynamic> toJson() => {
@@ -26,6 +28,7 @@ class RequestModel {
         "descricao": descricao,
         "dataSolicitacao": dataSolicitacao,
         "status": status,
-        "id": id
+        "id": id,
+        "prestadorId": prestadorId
       };
 }

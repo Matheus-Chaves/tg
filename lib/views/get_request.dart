@@ -19,6 +19,7 @@ class GetRequest extends StatefulWidget {
 class _GetRequestState extends State<GetRequest> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController _descricaoSolicitacao = TextEditingController();
+  final TextEditingController _observacaoSolicitacao = TextEditingController();
 
   final User? user = Auth().currentUser;
   late final bool _readOnly;
@@ -79,13 +80,42 @@ class _GetRequestState extends State<GetRequest> {
                   _readOnly
                       ? Wrap(
                           children: [
+                            // DropdownButton(
+                            //     items: [
+                            //       DropdownMenuItem(child: Text("Aceitar")),
+                            //       DropdownMenuItem(child: Text("Recusar")),
+                            //       DropdownMenuItem(child: Text("Recusar")),
+                            //     ],
+                            //     value: _dropdownValue,
+                            //     onChanged: ((value) {
+                            //       setState(() {
+                            //         _dropdownValue = value;
+                            //       });
+                            //     })),
+                            RadioListTile(
+                              title: const Text("Aceitar solicitação"),
+                              value: "",
+                              groupValue: "aceitar",
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                            ),
+                            RadioListTile(
+                              title: const Text("Recusar solicitação"),
+                              value: "",
+                              groupValue: "recusar",
+                              onChanged: (value) {
+                                setState(() {});
+                              },
+                            ),
+                            const Text("Observação ou motivo da recusa:"),
                             TextField(
-                              controller: _descricaoSolicitacao,
+                              controller: _observacaoSolicitacao,
                               maxLines: null,
                               keyboardType: TextInputType.multiline,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
-                                labelText: 'Descrição da solicitação',
+                                labelText: 'Observação',
                                 hintMaxLines: 5,
                                 hintText:
                                     "Descreva com detalhes sua solicitação de serviço. Diga para quando precisa, onde e como será entregue, etc.",
@@ -124,6 +154,7 @@ class _GetRequestState extends State<GetRequest> {
                                 widget.request.dataSolicitacao,
                                 widget.request.status,
                                 widget.request.id,
+                                widget.request.prestadorId,
                               );
                               await requestController.updateService(request);
                             },

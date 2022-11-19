@@ -23,7 +23,7 @@ class _ClienteHomePageState extends State<ClienteHomePage> {
       init: ServiceController(),
       initState: (_) {},
       builder: (serviceController) {
-        serviceController.getServices();
+        serviceController.getAllServices();
         return Scaffold(
           appBar: AppBar(
             title: const Text('Página inicial'),

@@ -22,7 +22,7 @@ class _ClienteRequestsState extends State<ClienteRequests> {
         requestController.getRequests();
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Página inicial'),
+            title: const Text('Solicitações'),
           ),
           body: Container(
             padding: const EdgeInsets.all(20),

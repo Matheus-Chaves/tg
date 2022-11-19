@@ -41,6 +41,33 @@ class RequestController extends GetxController {
           request['dataSolicitacao'],
           request['status'],
           request['id'],
+          request['prestadorId'],
+        ));
+      }
+      isLoading = false;
+      update();
+    } catch (e) {
+      Get.snackbar('Erro em obter a solicitação', e.toString());
+    }
+  }
+
+  Future<void> getClientRequests() async {
+    try {
+      QuerySnapshot requests = await FirebaseFirestore.instance
+          .collection('requisicoes')
+          .where("prestadorId", isEqualTo: user!.uid)
+          .get();
+      requestList.clear();
+
+      for (var request in requests.docs) {
+        requestList.add(RequestModel(
+          request['solicitanteId'],
+          request['servicoId'],
+          request['descricao'],
+          request['dataSolicitacao'],
+          request['status'],
+          request['id'],
+          request['prestadorId'],
         ));
       }
       isLoading = false;

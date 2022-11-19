@@ -6,6 +6,7 @@ import 'package:tg/views/cliente_home_page.dart';
 import 'package:tg/views/meu_perfil.dart';
 import 'package:tg/views/prestador_home_page.dart';
 import 'package:tg/views/cliente_requests.dart';
+import 'package:tg/views/prestador_requests.dart';
 
 import '../auth.dart';
 
@@ -36,23 +37,23 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.tipoUsuario == "prestador") {
-        print("prestador");
+        debugPrint("prestador");
         prestadorVariables();
         return;
       }
 
       if (widget.tipoUsuario == "cliente") {
-        print("cliente");
+        debugPrint("cliente");
         clienteVariables();
         return;
       }
 
       getTipoUsuario(user).then((value) {
         if (value.contains("prestador")) {
-          print("firebase prestador");
+          debugPrint("firebase prestador");
           prestadorVariables();
         } else {
-          print("firebase cliente");
+          debugPrint("firebase cliente");
           clienteVariables();
         }
       });
@@ -87,9 +88,7 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       routes = <Widget>[
         const PrestadorHomePage(),
-        const Text(
-          'Likes',
-        ),
+        const PrestadorRequests(),
         const MeuPerfil(tipoUsuario: "prestador"),
       ];
 
