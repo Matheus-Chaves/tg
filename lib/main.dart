@@ -9,6 +9,9 @@ import 'package:tg/themes/main_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'auth_controller.dart';
 import 'firebase_options.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+
+import ".env";
 
 void main() async {
   runApp(const SplashScreen());
@@ -16,6 +19,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // .then((val) => Get.put(() => AuthController()));
   await GetStorage.init();
+  Stripe.publishableKey = stripePublishableKey;
+  await Stripe.instance.applySettings();
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
   ));
