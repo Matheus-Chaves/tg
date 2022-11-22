@@ -4,10 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tg/controllers/request_controller.dart';
-import 'package:tg/models/request_model.dart';
 import 'package:tg/models/service_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:tg/views/payment_screen.dart';
 
 import '../auth.dart';
 import '../controllers/service_controller.dart';
@@ -172,21 +171,22 @@ class _GetServiceState extends State<GetService> {
                               width: MediaQuery.of(context).size.width,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  final RequestController requestController =
-                                      Get.put(RequestController());
-                                  requestController.addRequest(
-                                    RequestModel(
-                                        user!.uid,
-                                        widget.service.id as String,
-                                        _descricaoSolicitacao.text.trim(),
-                                        Timestamp.now(),
-                                        "a aceitar",
-                                        FirebaseFirestore.instance
-                                            .collection("requests")
-                                            .doc()
-                                            .id,
-                                        widget.service.uid),
-                                  );
+                                  // final RequestController requestController =
+                                  //     Get.put(RequestController());
+                                  // requestController.addRequest(
+                                  //   RequestModel(
+                                  //       user!.uid,
+                                  //       widget.service.id as String,
+                                  //       _descricaoSolicitacao.text.trim(),
+                                  //       Timestamp.now(),
+                                  //       "a aceitar",
+                                  //       FirebaseFirestore.instance
+                                  //           .collection("requests")
+                                  //           .doc()
+                                  //           .id,
+                                  //       widget.service.uid),
+                                  // );
+                                  Get.to(() => const PaymentScreen());
                                 },
                                 child: const Text("SOLICITAR SERVIÇO"),
                               ),
