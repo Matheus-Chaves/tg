@@ -43,6 +43,8 @@ class RequestController extends GetxController {
           request['id'],
           request['prestadorId'],
           statusPagamento: request['statusPagamento'],
+          observacao: request['observacao'],
+          valor: request['valor'],
         ));
       }
       isLoading = false;
@@ -70,6 +72,8 @@ class RequestController extends GetxController {
           request['id'],
           request['prestadorId'],
           statusPagamento: request['statusPagamento'],
+          observacao: request['observacao'],
+          valor: request['valor'],
         ));
       }
       isLoading = false;
@@ -93,14 +97,12 @@ class RequestController extends GetxController {
   }
 
   Future<void> updateRequest(RequestModel request,
-      {Map<String, dynamic>? fields, required tipoUsuario}) async {
+      {required tipoUsuario}) async {
     try {
-      var data =
-          fields != null ? {...fields, ...request.toJson()} : request.toJson();
       await FirebaseFirestore.instance
           .collection('requisicoes')
           .doc(request.id)
-          .set(data, SetOptions(merge: true));
+          .set(request.toJson(), SetOptions(merge: true));
       requestList.clear();
       isLoading = false;
       update();

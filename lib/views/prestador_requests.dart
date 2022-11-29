@@ -65,10 +65,7 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w500),
                                           ),
-                                          if (requestController
-                                                  .requestList[index]
-                                                  .statusPagamento !=
-                                              null)
+                                          if (item.statusPagamento != null)
                                             AutoSizeText(
                                               "${item.statusPagamento}",
                                               maxLines: 1,
@@ -205,6 +202,10 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                       item.prestadorId,
                                                                       statusPagamento:
                                                                           item.statusPagamento,
+                                                                      observacao:
+                                                                          item.observacao,
+                                                                      valor: item
+                                                                          .valor,
                                                                     );
                                                                     await requestController
                                                                         .updateRequest(

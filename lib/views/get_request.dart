@@ -138,21 +138,10 @@ class _GetRequestState extends State<GetRequest> {
                               width: MediaQuery.of(context).size.width,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  String? statusPagamento;
-                                  Map<String, String> fields;
-                                  if (isAccepted == "em andamento") {
-                                    statusPagamento = "aguardando pagamento";
-                                    fields = {
-                                      "observacao":
-                                          _observacaoSolicitacao.text.trim(),
-                                      "valor": _valorServico.text.trim(),
-                                    };
-                                  } else {
-                                    fields = {
-                                      "observacao":
-                                          _observacaoSolicitacao.text.trim(),
-                                    };
-                                  }
+                                  String? statusPagamento =
+                                      isAccepted == "em andamento"
+                                          ? "aguardando pagamento"
+                                          : null;
                                   RequestModel request = RequestModel(
                                     widget.request.solicitanteId,
                                     widget.request.servicoId,
@@ -162,10 +151,13 @@ class _GetRequestState extends State<GetRequest> {
                                     widget.request.id,
                                     widget.request.prestadorId,
                                     statusPagamento: statusPagamento,
+                                    observacao:
+                                        _observacaoSolicitacao.text.trim(),
+                                    valor:
+                                        double.parse(_valorServico.text.trim()),
                                   );
                                   await requestController.updateRequest(
                                     request,
-                                    fields: fields,
                                     tipoUsuario: "prestador",
                                   );
                                 },
@@ -186,6 +178,9 @@ class _GetRequestState extends State<GetRequest> {
                                 "a aceitar",
                                 widget.request.id,
                                 widget.request.prestadorId,
+                                statusPagamento: widget.request.statusPagamento,
+                                observacao: widget.request.observacao,
+                                valor: widget.request.valor,
                               );
                               await requestController.updateRequest(
                                 request,
@@ -194,7 +189,7 @@ class _GetRequestState extends State<GetRequest> {
                             },
                             child: const Text("ATUALIZAR"),
                           ),
-                        )
+                        ),
                 ],
               ),
             ),

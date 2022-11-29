@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'package:get/get.dart';
 import 'package:tg/views/get_request.dart';
+import 'package:http/http.dart' as http;
 
 import '../controllers/request_controller.dart';
+import '../models/request_model.dart';
+import 'package:tg/.env';
 
 class ClienteRequests extends StatefulWidget {
   const ClienteRequests({Key? key}) : super(key: key);
@@ -13,6 +19,8 @@ class ClienteRequests extends StatefulWidget {
 }
 
 class _ClienteRequestsState extends State<ClienteRequests> {
+  Map<String, dynamic>? paymentIntent;
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<RequestController>(
@@ -46,6 +54,8 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                             : ListView.separated(
                                 itemCount: requestController.requestList.length,
                                 itemBuilder: (BuildContext context, index) {
+                                  RequestModel item =
+                                      requestController.requestList[index];
                                   return Card(
                                     child: SizedBox(
                                       width: 300,
@@ -53,13 +63,22 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Column(children: [
                                           AutoSizeText(
-                                            "Status: ${requestController.requestList[index].status}",
+                                            "Status: ${item.status}",
                                             maxLines: 1,
                                             minFontSize: 16,
                                             wrapWords: false,
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w500),
                                           ),
+                                          if (item.statusPagamento != null)
+                                            AutoSizeText(
+                                              "${item.statusPagamento}",
+                                              maxLines: 1,
+                                              minFontSize: 16,
+                                              wrapWords: false,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w400),
+                                            ),
                                           const Divider(),
                                           AutoSizeText(
                                             requestController
@@ -73,32 +92,48 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                             mainAxisAlignment:
                                                 MainAxisAlignment.end,
                                             children: [
-                                              ElevatedButton(
-                                                onPressed: () async {
-                                                  var res =
-                                                      await requestController
-                                                          .getRequest(
-                                                              requestController
-                                                                  .requestList[
-                                                                      index]
-                                                                  .id as String);
-                                                  print(res.descricao);
-                                                  Get.to(() => GetRequest(
-                                                        request: res,
-                                                        title:
-                                                            "Atualizar Solicitação",
-                                                      ));
-                                                },
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: const [
-                                                    Icon(Icons.edit),
-                                                    Text("Editar"),
-                                                  ],
-                                                ),
-                                              ),
+                                              item.statusPagamento ==
+                                                      "aguardando pagamento"
+                                                  ? ElevatedButton(
+                                                      onPressed: () async {
+                                                        await makePayment();
+                                                      },
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: const [
+                                                          Icon(Icons
+                                                              .monetization_on),
+                                                          Text("Pagar"),
+                                                        ],
+                                                      ),
+                                                    )
+                                                  : ElevatedButton(
+                                                      onPressed: () async {
+                                                        var res = await requestController
+                                                            .getRequest(
+                                                                requestController
+                                                                    .requestList[
+                                                                        index]
+                                                                    .id as String);
+                                                        print(res.descricao);
+                                                        Get.to(() => GetRequest(
+                                                              request: res,
+                                                              title:
+                                                                  "Atualizar Solicitação",
+                                                            ));
+                                                      },
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: const [
+                                                          Icon(Icons.edit),
+                                                          Text("Editar"),
+                                                        ],
+                                                      ),
+                                                    ),
                                               ElevatedButton(
                                                 onPressed: () => {
                                                   showDialog(
@@ -127,8 +162,6 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                                                           .requestList[
                                                                               index]
                                                                           .id);
-                                                              Navigator.pop(
-                                                                  context);
                                                             },
                                                             child: const Text(
                                                                 "Deletar"),
@@ -171,5 +204,95 @@ class _ClienteRequestsState extends State<ClienteRequests> {
         );
       },
     );
+  }
+
+  Future<void> makePayment() async {
+    try {
+      paymentIntent = await createPaymentIntent('20', 'brl');
+      //Payment Sheet
+      await stripe.Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: stripe.SetupPaymentSheetParameters(
+          // applePay: const PaymentSheetApplePay(merchantCountryCode: '+92',),
+          // googlePay: const PaymentSheetGooglePay(testEnv: true, currencyCode: "US", merchantCountryCode: "+92"),
+          paymentIntentClientSecret: paymentIntent!['client_secret'],
+          style: ThemeMode.light,
+          merchantDisplayName: 'Adnan',
+        ),
+      );
+
+      ///now finally display payment sheeet
+      displayPaymentSheet();
+    } catch (e, s) {
+      print('exception:$e$s');
+    }
+  }
+
+  displayPaymentSheet() async {
+    try {
+      await stripe.Stripe.instance.presentPaymentSheet().then((value) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                          Text("Payment Successfull"),
+                        ],
+                      ),
+                    ],
+                  ),
+                ));
+        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
+
+        paymentIntent = null;
+      }).onError((error, stackTrace) {
+        print('Error is:--->$error $stackTrace');
+      });
+    } on stripe.StripeException catch (e) {
+      print('Error is:---> $e');
+      showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+                content: Text("Cancelled "),
+              ));
+    } catch (e) {
+      print('$e');
+    }
+  }
+
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card'
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        headers: {
+          'Authorization': 'Bearer $stripeSecretKey',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body,
+      );
+      // ignore: avoid_print
+      print('Payment Intent Body->>> ${response.body.toString()}');
+      return jsonDecode(response.body);
+    } catch (err) {
+      // ignore: avoid_print
+      print('err charging user: ${err.toString()}');
+    }
+  }
+
+  calculateAmount(String amount) {
+    final calculatedAmout = (int.parse(amount)) * 100;
+    return calculatedAmout.toString();
   }
 }
