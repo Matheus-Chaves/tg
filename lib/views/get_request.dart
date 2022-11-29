@@ -20,9 +20,11 @@ class _GetRequestState extends State<GetRequest> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController _descricaoSolicitacao = TextEditingController();
   final TextEditingController _observacaoSolicitacao = TextEditingController();
+  final TextEditingController _valorServico = TextEditingController();
 
   final User? user = Auth().currentUser;
   late final bool _readOnly;
+  String isAccepted = "";
 
   @override
   void initState() {
@@ -34,6 +36,12 @@ class _GetRequestState extends State<GetRequest> {
   @override
   Widget build(BuildContext context) {
     final RequestController requestController = Get.put(RequestController());
+    String? text;
+    if (isAccepted == "em andamento") {
+      text = "Observação (opcional)";
+    } else if (isAccepted == "recusada") {
+      text = "Motivo da recusa";
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -80,65 +88,88 @@ class _GetRequestState extends State<GetRequest> {
                   _readOnly
                       ? Wrap(
                           children: [
-                            // DropdownButton(
-                            //     items: [
-                            //       DropdownMenuItem(child: Text("Aceitar")),
-                            //       DropdownMenuItem(child: Text("Recusar")),
-                            //       DropdownMenuItem(child: Text("Recusar")),
-                            //     ],
-                            //     value: _dropdownValue,
-                            //     onChanged: ((value) {
-                            //       setState(() {
-                            //         _dropdownValue = value;
-                            //       });
-                            //     })),
                             RadioListTile(
                               title: const Text("Aceitar solicitação"),
-                              value: "",
-                              groupValue: "aceitar",
+                              value: "em andamento",
+                              groupValue: isAccepted,
                               onChanged: (value) {
-                                setState(() {});
+                                setState(() => isAccepted = "em andamento");
                               },
                             ),
                             RadioListTile(
                               title: const Text("Recusar solicitação"),
-                              value: "",
-                              groupValue: "recusar",
+                              value: "recusada",
+                              groupValue: isAccepted,
                               onChanged: (value) {
-                                setState(() {});
+                                setState(() => isAccepted = "recusada");
                               },
                             ),
-                            const Text("Observação ou motivo da recusa:"),
-                            TextField(
-                              controller: _observacaoSolicitacao,
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Observação',
-                                hintMaxLines: 5,
-                                hintText:
-                                    "Descreva com detalhes sua solicitação de serviço. Diga para quando precisa, onde e como será entregue, etc.",
-                                alignLabelWithHint: true,
+                            isAccepted == "em andamento"
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: TextFormField(
+                                      controller: _valorServico,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: 'Valor final do serviço',
+                                        hintText: "00.00",
+                                      ),
+                                    ),
+                                  )
+                                : const Divider(),
+                            Text(text ?? ""),
+                            const SizedBox(height: 24),
+                            if (text != null)
+                              TextField(
+                                controller: _observacaoSolicitacao,
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  labelText: 'Observação',
+                                  hintMaxLines: 5,
+                                  hintText:
+                                      "Descreva com detalhes como você resolverá o pedido do cliente ou explique o motivo de ter recusado a solicitação.",
+                                  alignLabelWithHint: true,
+                                ),
                               ),
-                            ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
                               child: ElevatedButton(
                                 onPressed: () async {
-                                  // final RequestController requestController =
-                                  //     Get.put(RequestController());
-                                  // requestController.addRequest(
-                                  //   RequestModel(
-                                  //     user!.uid,
-                                  //     widget.request.id as String,
-                                  //     _descricaoSolicitacao.text.trim(),
-                                  //     Timestamp.now(),
-                                  //     "a aceitar",
-                                  //   ),
-                                  // );
+                                  String? statusPagamento;
+                                  Map<String, String> fields;
+                                  if (isAccepted == "em andamento") {
+                                    statusPagamento = "aguardando pagamento";
+                                    fields = {
+                                      "observacao":
+                                          _observacaoSolicitacao.text.trim(),
+                                      "valor": _valorServico.text.trim(),
+                                    };
+                                  } else {
+                                    fields = {
+                                      "observacao":
+                                          _observacaoSolicitacao.text.trim(),
+                                    };
+                                  }
+                                  RequestModel request = RequestModel(
+                                    widget.request.solicitanteId,
+                                    widget.request.servicoId,
+                                    _descricaoSolicitacao.text.trim(),
+                                    widget.request.dataSolicitacao,
+                                    isAccepted,
+                                    widget.request.id,
+                                    widget.request.prestadorId,
+                                    statusPagamento: statusPagamento,
+                                  );
+                                  await requestController.updateRequest(
+                                    request,
+                                    fields: fields,
+                                    tipoUsuario: "prestador",
+                                  );
                                 },
-                                child: const Text("SOLICITAR SERVIÇO"),
+                                child: const Text("DEFINIR SOLICITAÇÃO"),
                               ),
                             )
                           ],
@@ -152,11 +183,14 @@ class _GetRequestState extends State<GetRequest> {
                                 widget.request.servicoId,
                                 _descricaoSolicitacao.text.trim(),
                                 widget.request.dataSolicitacao,
-                                widget.request.status,
+                                "a aceitar",
                                 widget.request.id,
                                 widget.request.prestadorId,
                               );
-                              await requestController.updateService(request);
+                              await requestController.updateRequest(
+                                request,
+                                tipoUsuario: "cliente",
+                              );
                             },
                             child: const Text("ATUALIZAR"),
                           ),

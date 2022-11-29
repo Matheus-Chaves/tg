@@ -19,7 +19,7 @@ class RequestController extends GetxController {
           .collection('requisicoes')
           .doc(json['id'])
           .set(json);
-      Get.offAll(() => HomePage(tipoUsuario: "cliente"));
+      Get.offAll(() => const HomePage(tipoUsuario: "cliente"));
     } catch (e) {
       Get.snackbar("Erro em registrar a solicitação.", "$e");
     }
@@ -42,6 +42,7 @@ class RequestController extends GetxController {
           request['status'],
           request['id'],
           request['prestadorId'],
+          statusPagamento: request['statusPagamento'],
         ));
       }
       isLoading = false;
@@ -68,6 +69,7 @@ class RequestController extends GetxController {
           request['status'],
           request['id'],
           request['prestadorId'],
+          statusPagamento: request['statusPagamento'],
         ));
       }
       isLoading = false;
@@ -90,16 +92,19 @@ class RequestController extends GetxController {
     }
   }
 
-  Future<void> updateService(RequestModel request) async {
+  Future<void> updateRequest(RequestModel request,
+      {Map<String, dynamic>? fields, required tipoUsuario}) async {
     try {
+      var data =
+          fields != null ? {...fields, ...request.toJson()} : request.toJson();
       await FirebaseFirestore.instance
           .collection('requisicoes')
           .doc(request.id)
-          .set(request.toJson(), SetOptions(merge: true));
+          .set(data, SetOptions(merge: true));
       requestList.clear();
       isLoading = false;
       update();
-      Get.offAll(() => HomePage(tipoUsuario: "cliente"));
+      Get.offAll(() => HomePage(tipoUsuario: tipoUsuario));
     } catch (e) {
       Get.snackbar('Erro em atualizar a solicitação.', e.toString());
     }
@@ -114,7 +119,7 @@ class RequestController extends GetxController {
       requestList.clear();
       isLoading = false;
       update();
-      Get.offAll(() => HomePage(tipoUsuario: "cliente"));
+      Get.offAll(() => const HomePage(tipoUsuario: "cliente"));
     } catch (e) {
       Get.snackbar('Erro em deletar a solicitação.', e.toString());
     }

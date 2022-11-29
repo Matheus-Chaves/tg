@@ -11,8 +11,8 @@ import 'package:tg/views/prestador_requests.dart';
 import '../auth.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({Key? key, this.tipoUsuario}) : super(key: key);
-  String? tipoUsuario;
+  const HomePage({Key? key, this.tipoUsuario}) : super(key: key);
+  final String? tipoUsuario;
 
   @override
   State<HomePage> createState() => _HomePageState();
