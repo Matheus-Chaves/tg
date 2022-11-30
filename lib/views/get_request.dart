@@ -153,8 +153,11 @@ class _GetRequestState extends State<GetRequest> {
                                     statusPagamento: statusPagamento,
                                     observacao:
                                         _observacaoSolicitacao.text.trim(),
-                                    valor:
-                                        double.parse(_valorServico.text.trim()),
+                                    valor: _valorServico.text.isNotEmpty
+                                        ? double.parse(_valorServico.text
+                                            .trim()
+                                            .replaceFirst(",", "."))
+                                        : null,
                                   );
                                   await requestController.updateRequest(
                                     request,

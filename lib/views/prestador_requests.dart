@@ -67,7 +67,7 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                           ),
                                           if (item.statusPagamento != null)
                                             AutoSizeText(
-                                              "${item.statusPagamento}",
+                                              "- ${item.statusPagamento} -",
                                               maxLines: 1,
                                               minFontSize: 16,
                                               wrapWords: false,
@@ -75,11 +75,16 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                   fontWeight: FontWeight.w400),
                                             ),
                                           const Divider(),
-                                          AutoSizeText(
-                                            item.descricao,
-                                            maxLines: 4,
-                                            overflow: TextOverflow.ellipsis,
-                                            minFontSize: 16,
+                                          SizedBox(
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: AutoSizeText(
+                                              "Descrição da solicitação:\n${item.descricao}",
+                                              maxLines: 4,
+                                              overflow: TextOverflow.ellipsis,
+                                              minFontSize: 16,
+                                            ),
                                           ),
                                           const Divider(),
                                           status == "a aceitar"

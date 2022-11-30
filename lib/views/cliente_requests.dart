@@ -61,129 +61,211 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                       width: 300,
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
-                                        child: Column(children: [
-                                          AutoSizeText(
-                                            "Status: ${item.status}",
-                                            maxLines: 1,
-                                            minFontSize: 16,
-                                            wrapWords: false,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          if (item.statusPagamento != null)
+                                        child: Column(
+                                          children: [
                                             AutoSizeText(
-                                              "${item.statusPagamento}",
+                                              "Status: ${item.status}",
                                               maxLines: 1,
                                               minFontSize: 16,
                                               wrapWords: false,
                                               style: const TextStyle(
-                                                  fontWeight: FontWeight.w400),
+                                                  fontWeight: FontWeight.w500),
                                             ),
-                                          const Divider(),
-                                          AutoSizeText(
-                                            requestController
-                                                .requestList[index].descricao,
-                                            maxLines: 4,
-                                            overflow: TextOverflow.ellipsis,
-                                            minFontSize: 16,
-                                          ),
-                                          const Divider(),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.end,
-                                            children: [
-                                              item.statusPagamento ==
-                                                      "aguardando pagamento"
-                                                  ? ElevatedButton(
-                                                      onPressed: () async {
-                                                        await makePayment();
-                                                      },
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: const [
-                                                          Icon(Icons
-                                                              .monetization_on),
-                                                          Text("Pagar"),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  : ElevatedButton(
-                                                      onPressed: () async {
-                                                        var res = await requestController
-                                                            .getRequest(
-                                                                requestController
-                                                                    .requestList[
-                                                                        index]
-                                                                    .id as String);
-                                                        print(res.descricao);
-                                                        Get.to(() => GetRequest(
-                                                              request: res,
-                                                              title:
-                                                                  "Atualizar Solicitação",
-                                                            ));
-                                                      },
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: const [
-                                                          Icon(Icons.edit),
-                                                          Text("Editar"),
-                                                        ],
-                                                      ),
-                                                    ),
-                                              ElevatedButton(
-                                                onPressed: () => {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            "Atenção!"),
-                                                        content: const Text(
-                                                            "Tem certeza que quer deletar sua solicitação?"),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            child: const Text(
-                                                                "Cancelar"),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed:
-                                                                () async {
-                                                              await requestController
-                                                                  .deleteRequest(
-                                                                      requestController
-                                                                          .requestList[
-                                                                              index]
-                                                                          .id);
-                                                            },
-                                                            child: const Text(
-                                                                "Deletar"),
-                                                          )
-                                                        ],
-                                                      );
-                                                    },
-                                                  ),
-                                                },
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: const [
-                                                    Icon(Icons.delete),
-                                                    Text('Deletar')
-                                                  ],
-                                                ),
+                                            if (item.statusPagamento != null)
+                                              AutoSizeText(
+                                                "- ${item.statusPagamento} - ",
+                                                maxLines: 1,
+                                                minFontSize: 16,
+                                                wrapWords: false,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.w400),
                                               ),
+                                            const Divider(),
+                                            SizedBox(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              child: AutoSizeText(
+                                                "Descrição da solicitação:\n${item.descricao}",
+                                                maxLines: 4,
+                                                overflow: TextOverflow.ellipsis,
+                                                minFontSize: 16,
+                                              ),
+                                            ),
+                                            if (item.observacao != null &&
+                                                item.status != "a aceitar") ...[
+                                              const Divider(),
+                                              SizedBox(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                child: AutoSizeText(
+                                                  "Observação do prestador:\n${item.observacao!}",
+                                                  maxLines: 4,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  minFontSize: 16,
+                                                ),
+                                              )
                                             ],
-                                          ),
-                                        ]),
+                                            const Divider(),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                item.statusPagamento ==
+                                                        "aguardando pagamento"
+                                                    ? ElevatedButton(
+                                                        onPressed: () => {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return AlertDialog(
+                                                                title: const Text(
+                                                                    "Visualize as informações"),
+                                                                content:
+                                                                    SingleChildScrollView(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width,
+                                                                        child: Text(
+                                                                            "Observação do prestador:\n${item.observacao!}"),
+                                                                      ),
+                                                                      const Divider(),
+                                                                      SizedBox(
+                                                                        width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width,
+                                                                        child: Text(
+                                                                            "Valor a ser pago:\nR\$ ${item.valor}"),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                actions: [
+                                                                  TextButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                    },
+                                                                    child: const Text(
+                                                                        "Voltar"),
+                                                                  ),
+                                                                  ElevatedButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      await makePayment(
+                                                                          item.valor!);
+                                                                    },
+                                                                    child: Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .end,
+                                                                      children: [
+                                                                        const Icon(
+                                                                            Icons.monetization_on),
+                                                                        Text(
+                                                                            "Pagar R\$ ${item.valor}"),
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              );
+                                                            },
+                                                          ),
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: const [
+                                                            Icon(Icons
+                                                                .remove_red_eye),
+                                                            Text("Visualizar"),
+                                                          ],
+                                                        ),
+                                                      )
+                                                    : ElevatedButton(
+                                                        onPressed: () async {
+                                                          var res = await requestController
+                                                              .getRequest(
+                                                                  requestController
+                                                                      .requestList[
+                                                                          index]
+                                                                      .id as String);
+                                                          print(res.descricao);
+                                                          Get.to(() =>
+                                                              GetRequest(
+                                                                request: res,
+                                                                title:
+                                                                    "Atualizar Solicitação",
+                                                              ));
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: const [
+                                                            Icon(Icons.edit),
+                                                            Text("Editar"),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                ElevatedButton(
+                                                  onPressed: () => {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              "Atenção!"),
+                                                          content: const Text(
+                                                              "Tem certeza que quer deletar sua solicitação?"),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.pop(
+                                                                    context);
+                                                              },
+                                                              child: const Text(
+                                                                  "Cancelar"),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                await requestController.deleteRequest(
+                                                                    requestController
+                                                                        .requestList[
+                                                                            index]
+                                                                        .id);
+                                                              },
+                                                              child: const Text(
+                                                                  "Deletar"),
+                                                            )
+                                                          ],
+                                                        );
+                                                      },
+                                                    ),
+                                                  },
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: const [
+                                                      Icon(Icons.delete),
+                                                      Text('Deletar')
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
@@ -206,9 +288,9 @@ class _ClienteRequestsState extends State<ClienteRequests> {
     );
   }
 
-  Future<void> makePayment() async {
+  Future<void> makePayment(double valor) async {
     try {
-      paymentIntent = await createPaymentIntent('20', 'brl');
+      paymentIntent = await createPaymentIntent(valor, 'brl');
       //Payment Sheet
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
@@ -231,25 +313,23 @@ class _ClienteRequestsState extends State<ClienteRequests> {
     try {
       await stripe.Stripe.instance.presentPaymentSheet().then((value) {
         showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.green,
-                          ),
-                          Text("Payment Successfull"),
-                        ],
-                      ),
-                    ],
+          context: context,
+          builder: (_) => AlertDialog(
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
                   ),
-                ));
-        // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("paid successfully")));
-
+                  Text(
+                      "Pago com sucesso!\n\nQuando sua solicitação estiver pronta, você poderá obter seus resultados."),
+                ],
+              ),
+            ),
+          ),
+        );
         paymentIntent = null;
       }).onError((error, stackTrace) {
         print('Error is:--->$error $stackTrace');
@@ -266,7 +346,7 @@ class _ClienteRequestsState extends State<ClienteRequests> {
     }
   }
 
-  createPaymentIntent(String amount, String currency) async {
+  createPaymentIntent(double amount, String currency) async {
     try {
       Map<String, dynamic> body = {
         'amount': calculateAmount(amount),
@@ -291,8 +371,10 @@ class _ClienteRequestsState extends State<ClienteRequests> {
     }
   }
 
-  calculateAmount(String amount) {
-    final calculatedAmout = (int.parse(amount)) * 100;
-    return calculatedAmout.toString();
+  calculateAmount(double amount) {
+    print("amount: ${(amount * 100).toInt()}");
+    final calculatedAmount = (amount * 100).toInt();
+    print("calculatedamount: $calculatedAmount");
+    return calculatedAmount.toString();
   }
 }
