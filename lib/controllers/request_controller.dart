@@ -96,8 +96,7 @@ class RequestController extends GetxController {
     }
   }
 
-  Future<void> updateRequest(RequestModel request,
-      {required tipoUsuario}) async {
+  Future<void> updateRequest(RequestModel request, {tipoUsuario}) async {
     try {
       await FirebaseFirestore.instance
           .collection('requisicoes')
@@ -106,7 +105,9 @@ class RequestController extends GetxController {
       requestList.clear();
       isLoading = false;
       update();
-      Get.offAll(() => HomePage(tipoUsuario: tipoUsuario));
+      if (tipoUsuario != null) {
+        Get.offAll(() => HomePage(tipoUsuario: tipoUsuario));
+      }
     } catch (e) {
       Get.snackbar('Erro em atualizar a solicitação.', e.toString());
     }

@@ -160,7 +160,7 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                                                     onPressed:
                                                                         () async {
                                                                       await makePayment(
-                                                                          item.valor!);
+                                                                          item);
                                                                     },
                                                                     child: Row(
                                                                       mainAxisAlignment:
@@ -288,9 +288,9 @@ class _ClienteRequestsState extends State<ClienteRequests> {
     );
   }
 
-  Future<void> makePayment(double valor) async {
+  Future<void> makePayment(RequestModel item) async {
     try {
-      paymentIntent = await createPaymentIntent(valor, 'brl');
+      paymentIntent = await createPaymentIntent(item.valor!, 'brl');
       //Payment Sheet
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
@@ -303,15 +303,30 @@ class _ClienteRequestsState extends State<ClienteRequests> {
       );
 
       ///now finally display payment sheeet
-      displayPaymentSheet();
+      displayPaymentSheet(item);
     } catch (e, s) {
       print('exception:$e$s');
     }
   }
 
-  displayPaymentSheet() async {
+  displayPaymentSheet(RequestModel item) async {
     try {
-      await stripe.Stripe.instance.presentPaymentSheet().then((value) {
+      await stripe.Stripe.instance.presentPaymentSheet().then((value) async {
+        //! Set statusPagamento = "pago"
+        var requestController = Get.put(RequestController());
+        var newModel = RequestModel(
+          item.solicitanteId,
+          item.servicoId,
+          item.descricao,
+          item.dataSolicitacao,
+          item.status,
+          item.id,
+          item.prestadorId,
+          observacao: item.observacao,
+          valor: item.valor,
+          statusPagamento: "pago",
+        );
+        await requestController.updateRequest(newModel);
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
