@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tg/views/get_request.dart';
+import 'package:path/path.dart';
 
+import '../widgets/button_widget.dart';
+import 'get_request.dart';
 import '../controllers/request_controller.dart';
 import '../models/request_model.dart';
 
@@ -14,8 +20,12 @@ class PrestadorRequests extends StatefulWidget {
 }
 
 class _PrestadorRequestsState extends State<PrestadorRequests> {
+  UploadTask? task;
+  File? file;
+
   @override
   Widget build(BuildContext context) {
+    final fileName = file != null ? basename(file!.path) : 'Nenhum selecionado';
     return GetBuilder<RequestController>(
       init: RequestController(),
       initState: (_) {},
@@ -126,62 +136,111 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   "Atenção!"),
-                                                              content:
-                                                                  SingleChildScrollView(
-                                                                child: Column(
-                                                                  children: [
-                                                                    const Text(
-                                                                        "Esta ação irá atualizar o status do serviço.\n\nEscolha o novo status:"),
-                                                                    const SizedBox(
-                                                                        height:
-                                                                            24),
-                                                                    DropdownButtonFormField(
-                                                                      value:
-                                                                          status,
-                                                                      menuMaxHeight:
-                                                                          300,
-                                                                      hint: const Text(
-                                                                          "Defina o status"),
-                                                                      isExpanded:
-                                                                          true,
-                                                                      isDense:
-                                                                          true,
-                                                                      icon: const Icon(
-                                                                          Icons
-                                                                              .keyboard_arrow_down),
-                                                                      items: [
-                                                                        "em andamento",
-                                                                        "concluída",
-                                                                        "cancelada"
-                                                                      ].map((String
-                                                                          items) {
-                                                                        return DropdownMenuItem(
-                                                                          value:
-                                                                              items,
-                                                                          child:
-                                                                              Text(items),
-                                                                        );
-                                                                      }).toList(),
-                                                                      onChanged:
-                                                                          (String?
-                                                                              newValue) {
-                                                                        setState(
-                                                                            () {
-                                                                          status =
-                                                                              newValue!;
-                                                                        });
-                                                                      },
-                                                                      decoration:
-                                                                          const InputDecoration(
-                                                                        border:
-                                                                            OutlineInputBorder(),
-                                                                        labelText:
-                                                                            'Status',
+                                                              content: StatefulBuilder(builder:
+                                                                  (BuildContext
+                                                                          context,
+                                                                      StateSetter
+                                                                          setState) {
+                                                                return SingleChildScrollView(
+                                                                  child: Column(
+                                                                    children: [
+                                                                      const Text(
+                                                                          "Esta ação irá atualizar o status do serviço.\n\nEscolha o novo status:"),
+                                                                      const SizedBox(
+                                                                          height:
+                                                                              24),
+                                                                      DropdownButtonFormField(
+                                                                        value:
+                                                                            status,
+                                                                        menuMaxHeight:
+                                                                            300,
+                                                                        hint: const Text(
+                                                                            "Defina o status"),
+                                                                        isExpanded:
+                                                                            true,
+                                                                        isDense:
+                                                                            true,
+                                                                        icon: const Icon(
+                                                                            Icons.keyboard_arrow_down),
+                                                                        items: [
+                                                                          "em andamento",
+                                                                          "concluída",
+                                                                          "cancelada"
+                                                                        ].map((String
+                                                                            items) {
+                                                                          return DropdownMenuItem(
+                                                                            value:
+                                                                                items,
+                                                                            child:
+                                                                                Text(items),
+                                                                          );
+                                                                        }).toList(),
+                                                                        onChanged:
+                                                                            (String?
+                                                                                newValue) {
+                                                                          setState(
+                                                                              () {
+                                                                            status =
+                                                                                newValue!;
+                                                                          });
+                                                                        },
+                                                                        decoration:
+                                                                            const InputDecoration(
+                                                                          border:
+                                                                              OutlineInputBorder(),
+                                                                          labelText:
+                                                                              'Status',
+                                                                        ),
                                                                       ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
+                                                                      if (status ==
+                                                                          "concluída") ...[
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                24),
+                                                                        const Text(
+                                                                            "Para concluir o serviço, anexe o arquivo que será enviado ao cliente:"),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                8),
+                                                                        ButtonWidget(
+                                                                          text:
+                                                                              'Selecionar',
+                                                                          icon:
+                                                                              Icons.attach_file,
+                                                                          onClicked:
+                                                                              selectFile,
+                                                                        ),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                8),
+                                                                        Text(
+                                                                          fileName,
+                                                                          style: const TextStyle(
+                                                                              fontSize: 16,
+                                                                              fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                16),
+                                                                        ButtonWidget(
+                                                                          text:
+                                                                              'Enviar arquivo',
+                                                                          icon:
+                                                                              Icons.cloud_upload_outlined,
+                                                                          onClicked:
+                                                                              uploadFile,
+                                                                        ),
+                                                                        const SizedBox(
+                                                                            height:
+                                                                                8),
+                                                                        task != null
+                                                                            ? buildUploadStatus(task!)
+                                                                            : Container()
+                                                                      ],
+                                                                    ],
+                                                                  ),
+                                                                );
+                                                              }),
                                                               actions: [
                                                                 TextButton(
                                                                   onPressed:
@@ -267,4 +326,48 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
       },
     );
   }
+
+  Future selectFile() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
+
+    if (result == null) return;
+    final path = result.files.single.path!;
+
+    setState(() => file = File(path));
+  }
+
+  Future uploadFile() async {
+    if (file == null) return;
+
+    final fileName = basename(file!.path);
+    final destination = 'files/$fileName';
+
+    //task = FirebaseApi.uploadFile(destination, file!);
+    setState(() {});
+
+    if (task == null) return;
+
+    final snapshot = await task!.whenComplete(() {});
+    final urlDownload = await snapshot.ref.getDownloadURL();
+
+    print('Download-Link: $urlDownload');
+  }
+
+  Widget buildUploadStatus(UploadTask task) => StreamBuilder<TaskSnapshot>(
+        stream: task.snapshotEvents,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final snap = snapshot.data!;
+            final progress = snap.bytesTransferred / snap.totalBytes;
+            final percentage = (progress * 100).toStringAsFixed(2);
+
+            return Text(
+              '$percentage %',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            );
+          } else {
+            return Container();
+          }
+        },
+      );
 }
