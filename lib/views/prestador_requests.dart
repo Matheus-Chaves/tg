@@ -22,6 +22,7 @@ class PrestadorRequests extends StatefulWidget {
 class _PrestadorRequestsState extends State<PrestadorRequests> {
   UploadTask? task;
   File? file;
+  final TextEditingController _observacao = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +134,12 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                         showDialog(
                                                           context: context,
                                                           builder: (context) {
+                                                            if (item.status ==
+                                                                "cancelada") {
+                                                              _observacao.text =
+                                                                  item.observacao ??
+                                                                      "";
+                                                            }
                                                             return AlertDialog(
                                                               title: const Text(
                                                                   "Atenção!"),
@@ -237,6 +244,30 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                             ? buildUploadStatus(task!)
                                                                             : Container()
                                                                       ],
+                                                                      if (status ==
+                                                                          'cancelada') ...[
+                                                                        TextField(
+                                                                          controller:
+                                                                              _observacao,
+                                                                          maxLines:
+                                                                              null,
+                                                                          keyboardType:
+                                                                              TextInputType.multiline,
+                                                                          decoration:
+                                                                              const InputDecoration(
+                                                                            border:
+                                                                                OutlineInputBorder(),
+                                                                            labelText:
+                                                                                'Observação',
+                                                                            hintMaxLines:
+                                                                                5,
+                                                                            hintText:
+                                                                                "Descreva com detalhes o motivo de ter cancelado a solicitação.",
+                                                                            alignLabelWithHint:
+                                                                                true,
+                                                                          ),
+                                                                        ),
+                                                                      ]
                                                                     ],
                                                                   ),
                                                                 );
@@ -254,6 +285,13 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                 TextButton(
                                                                   onPressed:
                                                                       () async {
+                                                                    if (_observacao
+                                                                        .text
+                                                                        .isNotEmpty) {
+                                                                      item.observacao = _observacao
+                                                                          .text
+                                                                          .trim();
+                                                                    }
                                                                     RequestModel
                                                                         request =
                                                                         RequestModel(
