@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 
+import '../api/firebase_api.dart';
 import '../widgets/button_widget.dart';
 import 'get_request.dart';
 import '../controllers/request_controller.dart';
@@ -26,7 +27,6 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
 
   @override
   Widget build(BuildContext context) {
-    final fileName = file != null ? basename(file!.path) : 'Nenhum selecionado';
     return GetBuilder<RequestController>(
       init: RequestController(),
       initState: (_) {},
@@ -128,7 +128,8 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                     ],
                                                   ),
                                                 )
-                                              : status != "recusada"
+                                              : item.status != "recusada" &&
+                                                      item.status != "concluída"
                                                   ? ElevatedButton(
                                                       onPressed: () => {
                                                         showDialog(
@@ -148,6 +149,14 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                           context,
                                                                       StateSetter
                                                                           setState) {
+                                                                final fileName = file !=
+                                                                        null
+                                                                    ? basename(
+                                                                        file!
+                                                                            .path)
+                                                                    : 'Nenhum selecionado';
+                                                                print(fileName);
+
                                                                 return SingleChildScrollView(
                                                                   child: Column(
                                                                     children: [
@@ -214,8 +223,8 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                               'Selecionar',
                                                                           icon:
                                                                               Icons.attach_file,
-                                                                          onClicked:
-                                                                              selectFile,
+                                                                          onClicked: () =>
+                                                                              selectFile(setState),
                                                                         ),
                                                                         const SizedBox(
                                                                             height:
@@ -229,20 +238,20 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                         const SizedBox(
                                                                             height:
                                                                                 16),
-                                                                        ButtonWidget(
-                                                                          text:
-                                                                              'Enviar arquivo',
-                                                                          icon:
-                                                                              Icons.cloud_upload_outlined,
-                                                                          onClicked:
-                                                                              uploadFile,
-                                                                        ),
-                                                                        const SizedBox(
-                                                                            height:
-                                                                                8),
-                                                                        task != null
-                                                                            ? buildUploadStatus(task!)
-                                                                            : Container()
+                                                                        // ButtonWidget(
+                                                                        //   text:
+                                                                        //       'Enviar arquivo',
+                                                                        //   icon:
+                                                                        //       Icons.cloud_upload_outlined,
+                                                                        //   onClicked:
+                                                                        //       uploadFile,
+                                                                        // ),
+                                                                        // const SizedBox(
+                                                                        //     height:
+                                                                        //         8),
+                                                                        // task != null
+                                                                        //     ? buildUploadStatus(task!)
+                                                                        //     : Container()
                                                                       ],
                                                                       if (status ==
                                                                           'cancelada') ...[
@@ -285,36 +294,48 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                                                                 TextButton(
                                                                   onPressed:
                                                                       () async {
-                                                                    if (_observacao
-                                                                        .text
-                                                                        .isNotEmpty) {
-                                                                      item.observacao = _observacao
-                                                                          .text
-                                                                          .trim();
+                                                                    try {
+                                                                      if (status ==
+                                                                          'concluída') {
+                                                                        if (_observacao
+                                                                            .text
+                                                                            .isNotEmpty) {
+                                                                          item.observacao = _observacao
+                                                                              .text
+                                                                              .trim();
+                                                                        }
+                                                                        uploadFile(
+                                                                            item);
+                                                                      }
+                                                                      RequestModel
+                                                                          request =
+                                                                          RequestModel(
+                                                                        item.solicitanteId,
+                                                                        item.servicoId,
+                                                                        item.descricao,
+                                                                        item.dataSolicitacao,
+                                                                        status,
+                                                                        item.id,
+                                                                        item.prestadorId,
+                                                                        statusPagamento:
+                                                                            item.statusPagamento,
+                                                                        observacao:
+                                                                            item.observacao,
+                                                                        valor: item
+                                                                            .valor,
+                                                                      );
+                                                                      await requestController
+                                                                          .updateRequest(
+                                                                        request,
+                                                                        tipoUsuario:
+                                                                            "prestador",
+                                                                      );
+                                                                    } catch (e) {
+                                                                      Get.snackbar(
+                                                                        "Erro:",
+                                                                        "$e",
+                                                                      );
                                                                     }
-                                                                    RequestModel
-                                                                        request =
-                                                                        RequestModel(
-                                                                      item.solicitanteId,
-                                                                      item.servicoId,
-                                                                      item.descricao,
-                                                                      item.dataSolicitacao,
-                                                                      status,
-                                                                      item.id,
-                                                                      item.prestadorId,
-                                                                      statusPagamento:
-                                                                          item.statusPagamento,
-                                                                      observacao:
-                                                                          item.observacao,
-                                                                      valor: item
-                                                                          .valor,
-                                                                    );
-                                                                    await requestController
-                                                                        .updateRequest(
-                                                                      request,
-                                                                      tipoUsuario:
-                                                                          "prestador",
-                                                                    );
                                                                   },
                                                                   child: const Text(
                                                                       "Atualizar"),
@@ -365,7 +386,7 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
     );
   }
 
-  Future selectFile() async {
+  Future selectFile(StateSetter setState) async {
     final result = await FilePicker.platform.pickFiles(allowMultiple: false);
 
     if (result == null) return;
@@ -374,19 +395,22 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
     setState(() => file = File(path));
   }
 
-  Future uploadFile() async {
+  Future uploadFile(RequestModel item) async {
     if (file == null) return;
 
     final fileName = basename(file!.path);
-    final destination = 'files/$fileName';
+    final destination = 'arquivos/$fileName';
 
-    //task = FirebaseApi.uploadFile(destination, file!);
+    task = FirebaseApi.uploadFile(destination, file!);
     setState(() {});
 
     if (task == null) return;
 
     final snapshot = await task!.whenComplete(() {});
     final urlDownload = await snapshot.ref.getDownloadURL();
+
+    Get.put(RequestController());
+    await RequestController.instance.uploadFile(item.id, urlDownload);
 
     print('Download-Link: $urlDownload');
   }

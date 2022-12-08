@@ -127,4 +127,18 @@ class RequestController extends GetxController {
       Get.snackbar('Erro em deletar a solicitação.', e.toString());
     }
   }
+
+  Future<void> uploadFile(String requestId, String urlDownload) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('requisicoes')
+          .doc(requestId)
+          .set({"urlDownload": urlDownload}, SetOptions(merge: true));
+      requestList.clear();
+      isLoading = false;
+      update();
+    } catch (e) {
+      throw "Erro em fazer upload dos dados";
+    }
+  }
 }
