@@ -17,17 +17,26 @@ class PrestadorHomePage extends StatefulWidget {
 
 class _PrestadorHomePageState extends State<PrestadorHomePage> {
   final User? user = Auth().currentUser;
-  final int _selectedIndex = 0;
+  late final ServiceController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(ServiceController());
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ServiceController serviceController = Get.put(ServiceController());
-    //debugPrint(user!.uid.toString());
+    controller.update();
     return GetBuilder<ServiceController>(
-      init: ServiceController(),
-      initState: (_) {},
+      init: Get.put(ServiceController()),
+      initState: (_) async {
+        await controller.getServices();
+        controller.update();
+      },
+      didUpdateWidget: (_, __) => controller.getServices(),
+      autoRemove: false,
       builder: (serviceController) {
-        serviceController.getServices();
         return Scaffold(
           appBar: AppBar(
             title: const Text('Página inicial'),
@@ -40,9 +49,9 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
               children: <Widget>[
                 Flexible(
                   child: Center(
-                    child: serviceController.isLoading
+                    child: controller.isLoading
                         ? const CircularProgressIndicator()
-                        : serviceController.serviceList.isEmpty
+                        : controller.serviceList.isEmpty
                             ? Container(
                                 color: Colors.green.shade800,
                                 padding: const EdgeInsets.all(12),
@@ -54,12 +63,8 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
                                 ),
                               )
                             : ListView.separated(
-                                itemCount: serviceController.serviceList.length,
+                                itemCount: controller.serviceList.length,
                                 itemBuilder: (BuildContext context, index) {
-                                  // return Text(
-                                  //   serviceController.serviceList[index].id
-                                  //       as String,
-                                  // );
                                   return Card(
                                     child: SizedBox(
                                       width: 300,
@@ -67,7 +72,7 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
                                         padding: const EdgeInsets.all(8.0),
                                         child: Column(children: [
                                           AutoSizeText(
-                                            "Valor mínimo: R\$ ${serviceController.serviceList[index].valorMinimo}",
+                                            "Valor mínimo: R\$ ${controller.serviceList[index].valorMinimo}",
                                             maxLines: 1,
                                             minFontSize: 16,
                                             wrapWords: false,
@@ -76,7 +81,7 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
                                           ),
                                           const Divider(),
                                           AutoSizeText(
-                                            serviceController
+                                            controller
                                                 .serviceList[index].descricao,
                                             maxLines: 4,
                                             overflow: TextOverflow.ellipsis,
@@ -89,13 +94,10 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
                                             children: [
                                               ElevatedButton(
                                                 onPressed: () async {
-                                                  var res =
-                                                      await serviceController
-                                                          .getService(
-                                                              serviceController
-                                                                  .serviceList[
-                                                                      index]
-                                                                  .id as String);
+                                                  var res = await controller
+                                                      .getService(controller
+                                                          .serviceList[index]
+                                                          .id as String);
                                                   Get.to(() => GetService(
                                                         service: res,
                                                         title:
@@ -134,8 +136,8 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
                                                           TextButton(
                                                             onPressed:
                                                                 () async {
-                                                              await serviceController.deleteService(
-                                                                  serviceController
+                                                              await controller
+                                                                  .deleteService(controller
                                                                       .serviceList[
                                                                           index]
                                                                       .id as String);

@@ -7,6 +7,7 @@ import 'package:tg/views/home_page.dart';
 import '../models/service_model.dart';
 
 class ServiceController extends GetxController {
+  static final ServiceController instance = Get.find();
   var isLoading = true;
   var serviceList = <ServiceModel>[];
   final User? user = Auth().currentUser;
@@ -71,7 +72,7 @@ class ServiceController extends GetxController {
       serviceList.clear();
       isLoading = false;
       update();
-      Get.offAll(HomePage(
+      Get.offAll(const HomePage(
         tipoUsuario: "prestador",
       ));
     } catch (e) {
@@ -102,7 +103,7 @@ class ServiceController extends GetxController {
       serviceList.clear();
       isLoading = false;
       update();
-      Get.offAll(() => HomePage(tipoUsuario: "prestador"));
+      Get.offAll(() => const HomePage(tipoUsuario: "prestador"));
     } catch (e) {
       Get.snackbar('Erro em atualizar o serviço.', e.toString());
     }
@@ -117,7 +118,7 @@ class ServiceController extends GetxController {
       serviceList.clear();
       isLoading = false;
       update();
-      Get.to(() => HomePage(
+      Get.to(() => const HomePage(
             tipoUsuario: "prestador",
           ));
     } catch (e) {
