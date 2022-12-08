@@ -34,6 +34,12 @@ class RequestController extends GetxController {
       requestList.clear();
 
       for (var request in requests.docs) {
+        String url;
+        try {
+          url = request['urlDownload'];
+        } catch (e) {
+          url = "";
+        }
         requestList.add(RequestModel(
           request['solicitanteId'],
           request['servicoId'],
@@ -45,6 +51,7 @@ class RequestController extends GetxController {
           statusPagamento: request['statusPagamento'],
           observacao: request['observacao'],
           valor: request['valor'],
+          urlDownload: url,
         ));
       }
       isLoading = false;
