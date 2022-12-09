@@ -96,9 +96,10 @@ class RequestController extends GetxController {
           .collection('requisicoes')
           .doc(requestId)
           .get();
+      print("a");
       return RequestModel.fromDocumentSnapshot(docSnapshot: res);
     } catch (e) {
-      Get.snackbar('Erro em criar a solicitação.', e.toString());
+      Get.snackbar('Erro em obter a requisição.', e.toString());
       rethrow;
     }
   }

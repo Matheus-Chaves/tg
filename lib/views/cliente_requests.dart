@@ -54,8 +54,15 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                     child: requestController.isLoading
                         ? const CircularProgressIndicator()
                         : requestController.requestList.isEmpty
-                            ? const Text(
-                                "Ops! Você ainda não solicitou nenhum serviço.\nVá para a página inicial e contrate um serviço!",
+                            ? Container(
+                                color: Colors.green.shade800,
+                                padding: const EdgeInsets.all(12),
+                                child: const Text(
+                                  "Ops! Você ainda não solicitou nenhum serviço.\nVá para a página inicial e contrate um serviço!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
                               )
                             : ListView.separated(
                                 itemCount: requestController.requestList.length,
@@ -121,16 +128,6 @@ class _ClienteRequestsState extends State<ClienteRequests> {
                                                     item.status == "concluída"
                                                 ? ElevatedButton(
                                                     onPressed: () async {
-                                                      // final tempDir =
-                                                      //     await getTemporaryDirectory();
-                                                      // final path =
-                                                      //     '${tempDir.path}/arquivos';
-                                                      // print(path);
-                                                      // await Dio().download(
-                                                      //   item.urlDownload!,
-                                                      //   '/storage/emulated/0/Download',
-                                                      // );
-
                                                       _permissionReady =
                                                           await _checkPermission();
                                                       if (_permissionReady &&

@@ -52,8 +52,15 @@ class _PrestadorRequestsState extends State<PrestadorRequests> {
                     child: requestController.isLoading
                         ? const CircularProgressIndicator()
                         : requestController.requestList.isEmpty
-                            ? const Text(
-                                "Ops!\nVocê ainda não tem nenhuma requisição.\n\nQuando contratarem um serviço seu, os detalhes aparecerão nesta tela!",
+                            ? Container(
+                                color: Colors.green.shade800,
+                                padding: const EdgeInsets.all(12),
+                                child: const Text(
+                                  "Ops!\nVocê ainda não tem nenhuma requisição.\n\nQuando contratarem um serviço seu, os detalhes aparecerão nesta tela!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
                               )
                             : ListView.separated(
                                 itemCount: requestController.requestList.length,

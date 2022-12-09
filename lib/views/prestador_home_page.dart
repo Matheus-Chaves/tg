@@ -27,13 +27,9 @@ class _PrestadorHomePageState extends State<PrestadorHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    controller.update();
     return GetBuilder<ServiceController>(
-      init: Get.put(ServiceController()),
-      initState: (_) async {
-        await controller.getServices();
-        controller.update();
-      },
+      init: controller,
+      initState: (_) async => await controller.getServices(),
       didUpdateWidget: (_, __) => controller.getServices(),
       autoRemove: false,
       builder: (serviceController) {

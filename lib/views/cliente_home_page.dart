@@ -44,8 +44,15 @@ class _ClienteHomePageState extends State<ClienteHomePage> {
                     child: serviceController.isLoading
                         ? const CircularProgressIndicator()
                         : serviceController.serviceList.isEmpty
-                            ? const Text(
-                                "Ops! Parece que não há nenhum serviço cadastrado no sistema.\nCrie um perfil de prestador de serviços e cadastre o seu, ou convide um amigo para utilizar o app!",
+                            ? Container(
+                                color: Colors.green.shade800,
+                                padding: const EdgeInsets.all(12),
+                                child: const Text(
+                                  "Ops! Parece que não há nenhum serviço cadastrado no sistema.\nCrie um perfil de prestador de serviços e cadastre o seu, ou convide um amigo para utilizar o app!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
                               )
                             : ListView.separated(
                                 itemCount: serviceController.serviceList.length,

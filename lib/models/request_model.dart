@@ -28,7 +28,9 @@ class RequestModel {
     statusPagamento = docSnapshot["statusPagamento"];
     valor = docSnapshot["valor"];
     observacao = docSnapshot["observacao"];
-    urlDownload = docSnapshot["urlDownload"];
+    try {
+      urlDownload = docSnapshot["urlDownload"];
+    } catch (e) {}
   }
 
   Map<String, dynamic> toJson() => {

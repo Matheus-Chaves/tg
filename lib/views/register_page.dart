@@ -43,6 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
   ) {
     return TextField(
       controller: controller,
+      obscureText: title == "Senha",
       decoration: InputDecoration(
         labelText: title,
         enabledBorder: OutlineInputBorder(
